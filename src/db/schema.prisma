@@ -12,3 +12,135 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model DeliveryType {
+  id   Int    @id @default(autoincrement())
+  type String @unique @db.VarChar(20)
+
+  pictures Picture[]
+
+  @@map("delivery_types")
+}
+
+model ResourceType {
+  id   Int    @id @default(autoincrement())
+  type String @unique @db.VarChar(20)
+
+  pictures Picture[]
+
+  @@map("resource_types")
+}
+
+model Picture {
+  id             Int      @id @default(autoincrement())
+  name           String   @db.VarChar(255)
+  url            String   @unique @db.VarChar()
+  artist         String?  @db.VarChar(255)
+  publicId       String   @unique @db.VarChar(255)
+  version        Int      @db.Integer
+  deliveryTypeId Int      @default(1) @db.Integer
+  resourceTypeId Int      @default(1) @db.Integer
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime @default(now()) @map("updated_at") @db.Timestamptz(3)
+
+  gameId             Int? @unique @map("game_id") @db.Integer
+  characterId        Int? @unique @map("character_id") @db.Integer
+  sessionCharacterId Int? @unique @map("session_character_id") @db.Integer
+
+  resourceType     ResourceType      @relation(fields: [resourceTypeId], references: [id])
+  deliveryType     DeliveryType      @relation(fields: [deliveryTypeId], references: [id])
+  character        Character?        @relation(fields: [characterId], references: [id], onDelete: Cascade)
+  game             Game?             @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  sessionCharacter SessionCharacter? @relation(fields: [sessionCharacterId], references: [id])
+
+  @@map("pictures")
+}
+
+model Player {
+  id        Int     @id @default(autoincrement())
+  username  String? @default("Nameless") @db.VarChar(255)
+  sessionId Int     @unique @map("session_id") @db.Integer
+
+  session GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@map("players")
+}
+
+model Character {
+  id     Int    @id @default(autoincrement())
+  name   String @db.VarChar(255)
+  gameId Int    @map("game_id")
+
+  sprite      Picture?
+  coordinates Coordinate?
+  game        Game        @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@map("characters")
+}
+
+model SessionCharacter {
+  id        Int     @id @default(autoincrement())
+  name      String  @db.VarChar(255)
+  sessionId Int     @map("session_id")
+  found     Boolean @default(false) @db.Boolean
+
+  sprite      Picture?
+  coordinates Coordinate?
+  session     GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+
+  @@unique([id, sessionId])
+  @@map("session_characters")
+}
+
+model Coordinate {
+  id                 Int  @id @default(autoincrement())
+  characterId        Int  @unique @map("character_id") @db.Integer
+  sessionCharacterId Int? @unique @map("session_character_id") @db.Integer
+
+  normalizedX Float @map("normalized_x")
+  normalizedY Float @map("normalized_y")
+
+  rightX Int @map("right_x") @db.Integer
+  leftX  Int @map("left_x") @db.Integer
+  rightY Int @map("right_y") @db.Integer
+  leftY  Int @map("left_y") @db.Integer
+
+  character        Character         @relation(fields: [characterId], references: [id])
+  sessionCharacter SessionCharacter? @relation(fields: [sessionCharacterId], references: [id])
+
+  @@map("coordinates")
+}
+
+model GameSession {
+  id           Int       @id @default(autoincrement())
+  gameId       Int       @map("game_id") @db.Integer
+  sessionStart DateTime? @default(now()) @map("session_start") @db.Timestamptz(3)
+  sessionEnd   DateTime? @map("session_end") @db.Timestamptz(3)
+
+  player            Player?
+  game              Game               @relation(fields: [gameId], references: [id], onDelete: Cascade)
+  sessionCharacters SessionCharacter[]
+
+  @@map("game_sessions")
+}
+
+model Leaderboard {
+  id     Int @id @default(autoincrement())
+  gameId Int @unique @map("game_id") @db.Integer
+
+  game Game @relation(fields: [gameId], references: [id], onDelete: Cascade)
+
+  @@map("leaderboards")
+}
+
+model Game {
+  id    Int    @id @default(autoincrement())
+  title String @unique @db.VarChar(255)
+
+  board       Picture?
+  targets     Character[]
+  sessions    GameSession[]
+  leaderboard Leaderboard?
+
+  @@map("games")
+}
