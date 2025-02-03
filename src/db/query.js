@@ -38,10 +38,13 @@ const findUnique = (table) => async (queryDTO) =>
     },
   });
 
+const queryRaw = async (query) => client.$queryRaw`${query}`;
+
 export default {
   createOne,
   updateOne,
   deleteOne,
+  queryRaw,
   findMany,
   findUnique,
 };
