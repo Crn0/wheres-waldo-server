@@ -107,6 +107,11 @@ const createGameSession = async (title, selecOpsDTO) => {
       selectOps.select.sessionCharacters.select.coordinates = false;
     }
 
+    selectOps.select = {
+      ...selectOps.select,
+      player: { select: { id: true } },
+    };
+
     const options = {
       ...selectOps,
     };
@@ -207,6 +212,10 @@ const getGameSessionById = async (id) => {
 
     const gameSession = res[0];
 
+    if (!gameSession) {
+      throw new APIError("Game session does not exist.", httpStatus.NOT_FOUND);
+    }
+
     gameSession.sessionCharacters = gameSession.sessionCharacters.map((sc) => {
       const scRef = sc;
 
@@ -269,9 +278,15 @@ const checkGameSessionAnswer = async (sessionId, characterDTO) => {
           select: {
             id: true,
             name: true,
+            found: true,
+            coordinates: {
+              select: {
+                normalizedX: true,
+                normalizedY: true,
+              },
+            },
             sprite: {
               select: {
-                name: true,
                 url: true,
               },
             },
