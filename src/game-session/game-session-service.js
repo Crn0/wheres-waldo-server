@@ -110,6 +110,14 @@ const createGameSession = async (title, selecOpsDTO) => {
     selectOps.select = {
       ...selectOps.select,
       player: { select: { id: true } },
+      sessionCharacters: {
+        select: {
+          id: true,
+          name: true,
+          found: true,
+          sprite: { select: { url: true, artist: true } },
+        },
+      },
     };
 
     const options = {
