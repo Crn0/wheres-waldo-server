@@ -5,17 +5,15 @@ import validation from "./validation/index.js";
 
 const router = Router();
 
-router.use(middleware.readGameSession);
-
 router.get(
   "/current-game",
+  middleware.readGameSession,
   middleware.gameSessionCookieError,
   controller.currentGameSession
 );
 
 router.post(
   "/:sessionId/answer",
-  middleware.gameSessionCookieError,
   [
     validation.validateGameSessionId(),
     validation.validateWidth(),
@@ -32,7 +30,6 @@ router.delete(
   "/:sessionId",
   validation.validateGameSessionId(),
   middleware.validationError,
-  middleware.gameSessionCookieError,
   controller.deleteGameSession
 );
 
