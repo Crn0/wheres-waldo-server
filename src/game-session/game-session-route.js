@@ -16,7 +16,14 @@ router.get(
 router.post(
   "/:sessionId/answer",
   middleware.gameSessionCookieError,
-  validation.validateGameSessionId(),
+  [
+    validation.validateGameSessionId(),
+    validation.validateWidth(),
+    validation.validateHeight(),
+    validation.validateCurrentX(),
+    validation.validateCurrentY(),
+    validation.validateWidth(),
+  ],
   middleware.validationError,
   controller.gameSessionAnswer
 );
@@ -25,6 +32,7 @@ router.delete(
   "/:sessionId",
   validation.validateGameSessionId(),
   middleware.validationError,
+  middleware.gameSessionCookieError,
   controller.deleteGameSession
 );
 
