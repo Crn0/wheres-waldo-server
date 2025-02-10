@@ -4,7 +4,7 @@ import constants from "../constants/index.js";
 
 class ErrorHandler {
   static handleError(error, res) {
-    if (constants.env.NODE_ENV !== "prod") {
+    if (constants.env.NODE_ENV === "dev") {
       console.log(error);
     }
 
