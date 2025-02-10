@@ -45,13 +45,12 @@ model Picture {
 
   gameId             Int? @unique @map("game_id") @db.Integer
   characterId        Int? @unique @map("character_id") @db.Integer
-  sessionCharacterId Int? @unique @map("session_character_id") @db.Integer
 
   resourceType     ResourceType      @relation(fields: [resourceTypeId], references: [id])
   deliveryType     DeliveryType      @relation(fields: [deliveryTypeId], references: [id])
   character        Character?        @relation(fields: [characterId], references: [id], onDelete: Cascade)
   game             Game?             @relation(fields: [gameId], references: [id], onDelete: Cascade)
-  sessionCharacter SessionCharacter? @relation(fields: [sessionCharacterId], references: [id])
+  sessionCharacter SessionCharacter[] 
 
   @@map("pictures")
 }
@@ -79,13 +78,16 @@ model Character {
 }
 
 model SessionCharacter {
-  id        Int     @id @default(autoincrement())
-  name      String  @db.VarChar(255)
-  sessionId Int     @map("session_id")
-  found     Boolean @default(false) @db.Boolean
+  id           Int    @id @default(autoincrement())
+  name         String @db.VarChar(255)
+  sessionId    Int    @map("session_id")
+  coordinateId Int    @map("coordinate_id")
+  spriteId Int @map("sprite_id")
 
-  sprite      Picture?
-  coordinates Coordinate?
+  found Boolean @default(false) @db.Boolean
+
+  sprite      Picture @relation(fields: [spriteId], references: [id])
+  coordinates Coordinate  @relation(fields: [coordinateId], references: [id])
   session     GameSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@unique([id, sessionId])
@@ -93,9 +95,8 @@ model SessionCharacter {
 }
 
 model Coordinate {
-  id                 Int  @id @default(autoincrement())
-  characterId        Int  @unique @map("character_id") @db.Integer
-  sessionCharacterId Int? @unique @map("session_character_id") @db.Integer
+  id          Int @id @default(autoincrement())
+  characterId Int @unique @map("character_id") @db.Integer
 
   normalizedX Float @map("normalized_x")
   normalizedY Float @map("normalized_y")
@@ -105,8 +106,8 @@ model Coordinate {
   rightY Int @map("right_y") @db.Integer
   leftY  Int @map("left_y") @db.Integer
 
-  character        Character         @relation(fields: [characterId], references: [id])
-  sessionCharacter SessionCharacter? @relation(fields: [sessionCharacterId], references: [id])
+  character        Character          @relation(fields: [characterId], references: [id])
+  sessionCharacter SessionCharacter[]
 
   @@map("coordinates")
 }
