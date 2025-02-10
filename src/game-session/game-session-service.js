@@ -204,8 +204,8 @@ const getGameSessionById = async (id) => {
                     'sprite', JSON_BUILD_OBJECT('url', p.url, 'artist', p.artist)
                   ) 
                 FROM session_characters sc
-                LEFT JOIN coordinates c ON sc.id = c.session_character_id AND sc.found = true
-                LEFT JOIN pictures p ON sc.id = p.session_character_id
+                LEFT JOIN coordinates c ON sc.id = c.id AND sc.found = true
+                LEFT JOIN pictures p ON sc.sprite_id = p.id
                 WHERE sc.session_id = ${id}
                 ORDER BY sc.id ASC
               )) as "sessionCharacters" FROM game_sessions gs
