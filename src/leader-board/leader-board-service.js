@@ -40,6 +40,11 @@ const getLeaderBoardById = async (id) => {
     const q = Prisma.sql`
         SELECT
             g.*
+            /**
+              Convert an sub query to a array that joins the game_session and players table
+              that builds an object of player containing:
+                 id, time score, username and start of the game
+             */
             ,ARRAY((
                 SELECT 
                     JSON_BUILD_OBJECT(
