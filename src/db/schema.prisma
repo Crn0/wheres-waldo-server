@@ -101,10 +101,10 @@ model Coordinate {
   normalizedX Float @map("normalized_x")
   normalizedY Float @map("normalized_y")
 
-  rightX Int @map("right_x") @db.Integer
-  leftX  Int @map("left_x") @db.Integer
-  rightY Int @map("right_y") @db.Integer
-  leftY  Int @map("left_y") @db.Integer
+  rightX Int? @map("right_x") @db.Integer
+  leftX  Int? @map("left_x") @db.Integer
+  rightY Int? @map("right_y") @db.Integer
+  leftY  Int? @map("left_y") @db.Integer
 
   character        Character          @relation(fields: [characterId], references: [id])
   sessionCharacter SessionCharacter[]
