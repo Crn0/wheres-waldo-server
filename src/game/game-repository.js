@@ -1,6 +1,6 @@
 import query from "../db/query.js";
 
-const createOne = query.createOne("sessions");
+const createOne = query.createOne("game");
 const findMany = query.findMany("game");
 const findUnique = query.findUnique("game");
 
