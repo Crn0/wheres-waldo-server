@@ -22,7 +22,10 @@ const previewFile = (fileDtoObj) =>
     ...fileDtoObj.transformations,
   });
 
+const url = (publicId, options) => cloudinary.url(publicId, options);
+
 export default {
   uploadFile,
   previewFile,
+  url,
 };
