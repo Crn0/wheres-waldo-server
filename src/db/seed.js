@@ -1,340 +1,271 @@
+import fs from "fs/promises";
 import { join } from "path";
 import client from "./client.js";
+import gameService from "../game/game-service.js";
 import constants from "../constants/index.js";
 import storageService from "../storage/storage-service.js";
-import gameService from "../game/game-service.js";
 
-// TODO(DONE: update sleeping-dragon coordinates
-// normalizedX: 0.8811989100817439,
-// normalizedY: 0.5187893266730615,
-// leftX: 19,
-// rightX: 23,
-// leftY: 5,
-// rightY: 10,
+const createGames = async () => {
+  const path = join(import.meta.dirname, "..", "..", "public");
 
-const createGameBoard = async () => {
-  const path = join(
-    import.meta.dirname,
-    "..",
-    "..",
-    "public",
-    "dragon-island-wheres-waldo.webp"
-  );
+  const boardData = {
+    "dragon-island": {
+      artist: "@gozz_sss",
+    },
 
-  const file = {
-    file: path,
-    options: {
-      folder: `${constants.env.CLOUDINARY_ROOT_FOLDER}/dragon-island`,
-      type: "upload",
-      resource_type: "image",
-      use_filename: true,
-      eager: {
-        format: "webp",
-      },
+    "star-wars": {
+      artist: "@UFO78794757",
     },
   };
 
-  const picture = await storageService.upload(file);
-  const board = await client.picture.create({
-    data: {
-      name: "dragon-island-wheres-waldo",
-      url: picture.secure_url,
-      artist: "@gozz_sss",
-      publicId: picture.public_id,
-      version: picture.version,
-      resourceType: {
-        connectOrCreate: {
-          where: {
-            type: picture.resource_type,
-          },
-          create: {
-            type: picture.resource_type,
-          },
-        },
-      },
-      deliveryType: {
-        connectOrCreate: {
-          where: {
-            type: picture.type,
-          },
-          create: {
-            type: picture.type,
-          },
-        },
-      },
-    },
-  });
+  const files = await fs.readdir(path);
 
-  return board;
-};
+  return Promise.all(
+    files.map(async (file) => {
+      const fileName = file.split(".")[0];
+      const currentBoard = boardData[fileName];
 
-const createGame = async () => {
-  const game = await client.game.create({
-    data: {
-      title: "dragon-island",
-      board: {
-        connect: {
-          id: 1,
-        },
-      },
-    },
-  });
+      if (currentBoard) {
+        const data = {
+          file: `${path}/${file}`,
+          options: {
+            folder: `${constants.env.CLOUDINARY_ROOT_FOLDER}/${fileName}`,
+            type: "upload",
+            resource_type: "image",
+            use_filename: true,
+            eager: {
+              format: "webp",
+            },
+          },
+        };
 
-  return game;
+        const picture = await storageService.upload(data);
+
+        const board = await client.picture.create({
+          data: {
+            name: fileName,
+            url: picture.secure_url,
+            artist: currentBoard.artist,
+            publicId: picture.public_id,
+            version: picture.version,
+            resourceType: {
+              connectOrCreate: {
+                where: {
+                  type: picture.resource_type,
+                },
+                create: {
+                  type: picture.resource_type,
+                },
+              },
+            },
+            deliveryType: {
+              connectOrCreate: {
+                where: {
+                  type: picture.type,
+                },
+                create: {
+                  type: picture.type,
+                },
+              },
+            },
+          },
+        });
+
+        const [e, game] = await gameService.createGame({
+          data: {
+            title: fileName,
+            board: {
+              connect: {
+                id: board.id,
+              },
+            },
+          },
+        });
+
+        if (e) console.log(e);
+
+        return game;
+      }
+
+      return null;
+    })
+  );
 };
 
 const createCharacters = async () => {
   const path = join(import.meta.dirname, "..", "..", "public");
-  const files = [
-    {
-      name: "raft-man.png",
+
+  const charactersData = {
+    "raft-man": {
+      filePath: (file) => `${path}/${file}`,
+      name: "raft-man",
+      game: "dragon-island",
       coordinates: {
-        create: {
-          normalizedX: 0.05231607629427793,
-          normalizedY: 0.421835160460888,
-          leftX: 15,
-          rightX: 23,
-          leftY: 21,
-          rightY: 27,
-        },
+        normalizedX: 0.05231607629427793,
+        normalizedY: 0.421835160460888,
+        leftX: 15,
+        rightX: 23,
+        leftY: 21,
+        rightY: 27,
       },
     },
-    {
-      name: "cats.png",
+
+    "sleeping-dragon": {
+      filePath: (file) => `${path}/${file}`,
+      name: "sleeping-dragon",
+      game: "dragon-island",
       coordinates: {
-        create: {
-          normalizedX: 0.3634877384196185,
-          normalizedY: 0.23461772814749124,
-          leftX: 20,
-          rightX: 5,
-          leftY: 11,
-          rightY: 9,
-        },
+        normalizedX: 0.8811989100817439,
+        normalizedY: 0.5187893266730615,
+        leftX: 19,
+        rightX: 23,
+        leftY: 5,
+        rightY: 10,
       },
     },
-    {
-      name: "sleeping-dragon.png",
+
+    cats: {
+      filePath: (file) => `${path}/${file}`,
+      name: "cats",
+      game: "dragon-island",
       coordinates: {
-        create: {
-          normalizedX: 0.8811989100817439,
-          normalizedY: 0.5187893266730615,
-          leftX: 19,
-          rightX: 23,
-          leftY: 5,
-          rightY: 10,
-        },
+        normalizedX: 0.3634877384196185,
+        normalizedY: 0.23461772814749124,
+        leftX: 20,
+        rightX: 5,
+        leftY: 11,
+        rightY: 9,
       },
     },
-  ];
 
-  const characters = files.map(async (file) => {
-    const filePath = join(path, file.name);
-    const fileDto = {
-      file: filePath,
-      options: {
-        folder: `${constants.env.CLOUDINARY_ROOT_FOLDER}/dragon-island`,
-        type: "upload",
-        resource_type: "image",
-        use_filename: true,
-        eager: {
-          format: "webp",
-        },
-      },
-    };
-    const picture = await storageService.upload(fileDto);
-
-    const sprite = await client.picture.create({
-      data: {
-        name: file.name.split(".")[0],
-        url: picture.secure_url,
-        artist: "@gozz_sss",
-        publicId: picture.public_id,
-        version: picture.version,
-        resourceType: {
-          connectOrCreate: {
-            where: {
-              type: picture.resource_type,
-            },
-            create: {
-              type: picture.resource_type,
-            },
-          },
-        },
-        deliveryType: {
-          connectOrCreate: {
-            where: {
-              type: picture.type,
-            },
-            create: {
-              type: picture.type,
-            },
-          },
-        },
-      },
-    });
-
-    const character = await client.character.create({
-      data: {
-        name: file.name.split(".")[0],
-        sprite: {
-          connect: {
-            id: sprite.id,
-          },
-        },
-        coordinates: { ...file.coordinates },
-        game: {
-          connect: {
-            title: "dragon-island",
-          },
-        },
-      },
-    });
-
-    return character;
-  });
-
-  return Promise.all(characters);
-};
-
-const createGameSession = async () => {
-  const games = await client.game.findMany({
-    include: {
-      targets: {
-        select: {
-          name: true,
-          sprite: {
-            select: {
-              id: true,
-            },
-          },
-          coordinates: true,
-        },
+    superman: {
+      filePath: (file) => `${path}/${file}`,
+      name: "superman",
+      game: "star-wars",
+      coordinates: {
+        normalizedX: 0.11149864131081035,
+        normalizedY: 0.25588784808377046,
+        leftX: 67,
+        rightX: 32,
+        leftY: 1,
+        rightY: 46,
       },
     },
-  });
 
-  const sessionCharacters = games[0].targets.map((character) => ({
-    ...character,
-    sprite: {
-      connect: {
-        id: character.sprite.id,
+    "eye-of-sauron": {
+      filePath: (file) => `${path}/${file}`,
+      name: "eye-of-sauron",
+      game: "star-wars",
+      coordinates: {
+        normalizedX: 0.8877929450608072,
+        normalizedY: 0.2011018548084556,
+        leftX: 37,
+        rightX: 34,
+        leftY: 1,
+        rightY: 26,
       },
     },
-    coordinates: {
-      connect: {
-        id: character.coordinates.id,
+
+    "hooded-bear": {
+      filePath: (file) => `${path}/${file}`,
+      name: "hooded-bear",
+      game: "star-wars",
+      coordinates: {
+        normalizedX: 0.3986376154391875,
+        normalizedY: 0.748487428847188,
+        leftX: 22,
+        rightX: 20,
+        leftY: 9,
+        rightY: 26,
       },
     },
-  }));
+  };
 
-  const session = await client.gameSession.create({
-    data: {
-      game: {
-        connect: {
-          id: games[0].id,
-        },
-      },
-      player: {
-        create: {
-          username: "Crno",
-        },
-      },
-      sessionCharacters: {
-        create: sessionCharacters,
-      },
-    },
-  });
+  const files = await fs.readdir(path);
 
-  return session;
+  return Promise.all(
+    files.map(async (file) => {
+      const fileName = file.split(".")[0];
+      const currentCharacter = charactersData[fileName];
+
+      if (currentCharacter) {
+        const fileDto = {
+          file: currentCharacter.filePath(file),
+          options: {
+            folder: `${constants.env.CLOUDINARY_ROOT_FOLDER}/${currentCharacter.game}`,
+            type: "upload",
+            resource_type: "image",
+            use_filename: true,
+            eager: {
+              format: "webp",
+            },
+          },
+        };
+
+        const picture = await storageService.upload(fileDto);
+
+        const sprite = await client.picture.create({
+          data: {
+            name: currentCharacter.name,
+            url: picture.secure_url,
+            artist: "@gozz_sss",
+            publicId: picture.public_id,
+            version: picture.version,
+            resourceType: {
+              connectOrCreate: {
+                where: {
+                  type: picture.resource_type,
+                },
+                create: {
+                  type: picture.resource_type,
+                },
+              },
+            },
+            deliveryType: {
+              connectOrCreate: {
+                where: {
+                  type: picture.type,
+                },
+                create: {
+                  type: picture.type,
+                },
+              },
+            },
+          },
+        });
+
+        const character = await client.character.create({
+          data: {
+            name: currentCharacter.name,
+            sprite: {
+              connect: {
+                id: sprite.id,
+              },
+            },
+            coordinates: {
+              create: {
+                ...currentCharacter.coordinates,
+              },
+            },
+            game: {
+              connect: {
+                title: currentCharacter.game,
+              },
+            },
+          },
+        });
+
+        return character;
+      }
+
+      return null;
+    })
+  );
 };
 
 const main = async () => {
-  await createGameBoard().then(console.log).catch(console.error);
-  await createGame().then(console.log).catch(console.error);
-  await createCharacters().then(console.log).catch(console.error);
-  // await createGameSession().then(console.log).catch(console.error);
-  // await client.session.deleteMany({}).then(console.log);
-  // await client.player.findMany().then(async (players) => {
-  //   console.log("players", players);
-  // });
-  // const session = await client.gameSession.findUnique({
-  //   where: { id: 1 },
-  //   select: {
-  //     id: true,
-  //     sessionStart: true,
-  //     sessionEnd: true,
-  //     game: {
-  //       select: {
-  //         id: true,
-  //         title: true,
-  //         board: {
-  //           select: {
-  //             name: true,
-  //             url: true,
-  //             artist: true,
-  //           },
-  //         },
-  //         targets: {
-  //           select: {
-  //             id: true,
-  //             name: true,
-  //             sprite: {
-  //               select: {
-  //                 name: true,
-  //                 url: true,
-  //               },
-  //             },
-  //           },
-  //         },
-  //       },
-  //     },
-  //     sessionCharacters: {
-  //       select: {
-  //         id: true,
-  //         name: true,
-  //         found: true,
-  //         coordinates: true,
-  //         sprite: {
-  //           select: {
-  //             name: true,
-  //             url: true,
-  //           },
-  //         },
-  //       },
-  //     },
-  //   },
-  // });
-  // console.log(session);
-  // const game = await gameService.getGames({
-  //   where: {
-  //     id: 1,
-  //   },
-  //   select: {
-  //     id: true,
-  //     title: true,
-  //     board: {
-  //       select: {
-  //         name: true,
-  //         url: true,
-  //         artist: true,
-  //       },
-  //     },
-  //     targets: {
-  //       select: {
-  //         id: true,
-  //         name: true,
-  //         coordinates: true,
-  //         sprite: {
-  //           select: {
-  //             url: true,
-  //             artist: true,
-  //           },
-  //         },
-  //       },
-  //     },
-  //   },
-  // });
-  // console.log(game[0].targets[0].coordinates);
+  await createGames();
+  await createCharacters();
 };
 
 main();
