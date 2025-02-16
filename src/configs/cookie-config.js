@@ -5,6 +5,7 @@ const cookieConfig = {
   httpOnly: true,
   secure: constants.env.NODE_ENV === "prod",
   sameSite: constants.env.NODE_ENV === "prod" ? "none" : "lax",
+  credentials: true,
 };
 
 export default cookieConfig;
