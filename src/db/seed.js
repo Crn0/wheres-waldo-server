@@ -71,7 +71,7 @@ const createGames = async () => {
           },
         });
 
-        const [e, game] = await gameService.createGame({
+        const [_, game] = await gameService.createGame({
           data: {
             title: fileName,
             board: {
@@ -81,8 +81,6 @@ const createGames = async () => {
             },
           },
         });
-
-        if (e) console.log(e);
 
         return game;
       }
@@ -264,8 +262,12 @@ const createCharacters = async () => {
 };
 
 const main = async () => {
-  await createGames();
-  await createCharacters();
+  try {
+    await createGames();
+    await createCharacters();
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 main();
