@@ -1,6 +1,6 @@
 import fs from "fs/promises";
 import { join } from "path";
-import client from "./client.js";
+import client from "./client.cjs";
 import gameService from "../game/game-service.js";
 import constants from "../constants/index.js";
 import storageService from "../storage/storage-service.js";

@@ -5,6 +5,9 @@
   "version": "0.0.0",
   "main": "app.js",
   "type": "module",
+  "engines": {
+    "node": "=16.14.2"
+  },
   "prisma": {
     "schema": "./src/db/schema.prisma",
     "seed": "node ./src/db/seed.js"
@@ -16,7 +19,8 @@
     "prod": "dotenv -e .env.prod -- node --watch ./src/bin/www.js",
     "server": "DEBUG=<project-name>:* npm run dev",
     "prisma": "npx prisma init",
-    "seed": "dotenv -e .env.dev -- npx prisma db seed",
+    "seedDev": "dotenv -e .env.dev -- npx prisma db seed",
+    "seedProd": "dotenv -e .env.prod -- npx prisma db seed",
     "generateDev": "dotenv -e .env.dev -- npx prisma generate",
     "generateProd": "dotenv -e .env.prod -- npx prisma generate",
     "migrateDev": "dotenv -e .env.dev -- npx prisma migrate dev",

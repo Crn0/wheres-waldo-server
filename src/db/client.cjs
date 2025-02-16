@@ -1,15 +1,17 @@
-import { PrismaClient } from "@prisma/client";
-import constants from "../constants/index.js";
+const { PrismaClient } = require("@prisma/client");
+const constants = require("../constants/index.js").default;
 
 const databaseUrl =
   constants.env.NODE_ENV === "test"
     ? constants.env.TEST_DATABASE_URL
     : constants.env.DATABASE_URL;
 
-export default new PrismaClient({
+const prisma = new PrismaClient({
   datasources: {
     db: {
       url: databaseUrl,
     },
   },
 });
+
+exports.client = prisma;

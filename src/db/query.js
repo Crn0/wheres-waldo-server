@@ -1,4 +1,4 @@
-import client from "./client.js";
+import { client } from "./client.cjs";
 
 const createOne = (table) => async (dataDTO, selectDTO) =>
   client[table].create({ data: dataDTO.data, select: { ...selectDTO.select } });
