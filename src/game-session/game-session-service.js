@@ -206,7 +206,7 @@ const getGameSessionById = async (id) => {
                 FROM session_characters sc
                 LEFT JOIN coordinates c ON sc.coordinate_id = c.id AND sc.found = true
                 LEFT JOIN pictures p ON sc.sprite_id = p.id
-                WHERE sc.session_id = ${id}
+                WHERE sc.session_id = gs.id
                 ORDER BY sc.id ASC
               )) as "sessionCharacters" FROM game_sessions gs
       JOIN games g ON gs.game_id = g.id
