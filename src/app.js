@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 import compression from "compression";
 import helmet from "helmet";
 import logger from "morgan";
+import rateLimiter from "express-rate-limit";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import configs from "./configs/index.js";
@@ -16,7 +17,10 @@ const app = express();
 const __dirname =
   import.meta.dirname || dirname(fileURLToPath(import.meta.url));
 
+const limiter = rateLimiter(configs.rateLimit);
+
 app.use(cors(configs.cors));
+app.use(limiter);
 
 app.use(logger("dev"));
 app.use(express.json());
