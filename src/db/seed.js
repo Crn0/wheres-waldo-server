@@ -1,8 +1,9 @@
 import fs from "fs/promises";
 import { join } from "path";
 import client from "./client.js";
-import gameService from "../game/game-service.js";
 import constants from "../constants/index.js";
+import gameService from "../game/game-service.js";
+import leaderBoardService from "../leader-board/leader-board-service.js";
 import storageService from "../storage/storage-service.js";
 
 const createGames = async () => {
@@ -81,6 +82,8 @@ const createGames = async () => {
             },
           },
         });
+
+        await leaderBoardService.createLeaderBoard(game.id);
 
         return game;
       }
