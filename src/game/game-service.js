@@ -85,9 +85,54 @@ const getGames = async (selecOpsDTO) => {
   }
 };
 
+const deleteGameById = async (id, selecOpsDTO) => {
+  try {
+    const selectOps =
+      typeof selecOpsDTO === "object"
+        ? { ...selecOpsDTO }
+        : { ...queryOptions };
+
+    const options = {
+      ...selectOps,
+      where: {
+        id,
+      },
+    };
+
+    const q = await repository.deleteGame(options);
+
+    if (!q) {
+      throw new APIError("Game does not exist", httpStatus.NOT_FOUND);
+    }
+
+    return [null, q];
+  } catch (e) {
+    return [e, null];
+  }
+};
+
+const deleteGames = async () => {
+  try {
+    const options = {
+      where: {},
+    };
+    const q = await repository.deleteGames(options);
+
+    if (!q) {
+      throw new APIError("Game does not exist", httpStatus.NOT_FOUND);
+    }
+
+    return [null, q];
+  } catch (e) {
+    return [e, null];
+  }
+};
+
 export default {
   createGame,
   getGameByTitle,
   getGameById,
   getGames,
+  deleteGameById,
+  deleteGames,
 };

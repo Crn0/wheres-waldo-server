@@ -18,6 +18,9 @@ const updateOne = (table) => async (queryDTO) =>
 
 const deleteOne = (table) => async (queryDTO) => client[table].delete(queryDTO);
 
+const deleteMany = (table) => async (queryDTO) =>
+  client[table].deleteMany(queryDTO);
+
 const findMany = (table) => async (queryDTO) =>
   client[table].findMany({
     where: {
@@ -44,6 +47,7 @@ export default {
   createOne,
   updateOne,
   deleteOne,
+  deleteMany,
   queryRaw,
   findMany,
   findUnique,
