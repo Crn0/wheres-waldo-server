@@ -1,13 +1,11 @@
 import fs from "fs/promises";
 import { join } from "path";
-import { beforeAll, afterAll } from "vitest";
+import { beforeAll } from "vitest";
 import client from "../../src/db/client.js";
 import constants from "../../src/constants/index.js";
 import gameService from "../../src/game/game-service.js";
 import leaderBoardService from "../../src/leader-board/leader-board-service.js";
 import storageService from "../../src/storage/storage-service.js";
-
-let cleanDb = false;
 
 const createGames = async () => {
   const path = join(import.meta.dirname, "..", "..", "public");
@@ -275,8 +273,6 @@ const init = async () => {
 
     if (games.length) return;
 
-    cleanDb = true;
-
     await createGames();
     await createCharacters();
   } catch (e) {
@@ -284,32 +280,6 @@ const init = async () => {
   }
 };
 
-const cleanUp = async () => {
-  try {
-    if (cleanDb) return;
-
-    const [gamesError, games] = await gameService.getGames();
-
-    if (gamesError) throw gamesError;
-
-    await gameService.deleteGames();
-
-    await Promise.all(
-      games.map((g) =>
-        storageService.destroyFilesByFolder(
-          `${constants.env.CLOUDINARY_ROOT_FOLDER}/${g.title}`
-        )
-      )
-    );
-  } catch (e) {
-    console.log(e);
-  }
-};
-
 beforeAll(async () => {
-  //   await init();
-});
-
-afterAll(async () => {
-  //   await cleanUp();
+  await init();
 });
