@@ -106,7 +106,7 @@ model Coordinate {
   rightY Int? @map("right_y") @db.Integer
   leftY  Int? @map("left_y") @db.Integer
 
-  character        Character          @relation(fields: [characterId], references: [id])
+  character        Character          @relation(fields: [characterId], references: [id], onDelete: Cascade)
   sessionCharacter SessionCharacter[]
 
   @@map("coordinates")
